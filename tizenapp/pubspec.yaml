@@ -1,0 +1,29 @@
+name: tizenapp
+description: An unofficial Home Assistant companion app.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.1.4 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  step_circle_progressbar: ^0.1.3
+  wearable_rotary: ^2.0.2
+  home_assistant: ^1.0.0
+  flutter_colorpicker: ^1.0.3
+  shared_preferences: ^2.2.0
+  shared_preferences_tizen: ^2.2.0
+  ffi: ^2.0.1
+  http: ^1.1.0
+  tizen_interop: ^0.2.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true

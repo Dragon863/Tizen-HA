@@ -1,0 +1,1 @@
+Taken from https://github.com/flutter-tizen/plugins and modified 2023 by Dragon863 to implement smooth scrolling
