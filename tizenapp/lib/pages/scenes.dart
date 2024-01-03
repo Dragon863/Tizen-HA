@@ -1,19 +1,22 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:tizenapp/pages/rotate.dart';
 import 'package:tizenapp/rotary_lib/src/rotary_base.dart';
 import 'package:tizenapp/rotary_lib/src/smooth_scroll.dart';
 import 'package:tizenapp/utils/hass.dart';
+import 'package:string_2_icon/string_2_icon.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
-class LightsPage extends StatefulWidget {
+class ScenePage extends StatefulWidget {
   final API api;
 
-  const LightsPage({Key? key, required this.api}) : super(key: key);
+  const ScenePage({Key? key, required this.api}) : super(key: key);
 
   @override
-  State<LightsPage> createState() => _LightsPageState();
+  State<ScenePage> createState() => _ScenePageState();
 }
 
-class _LightsPageState extends State<LightsPage> {
+class _ScenePageState extends State<ScenePage> {
   API get api => widget.api;
   late Future<List<dynamic>> entitiesFuture;
 
@@ -25,7 +28,13 @@ class _LightsPageState extends State<LightsPage> {
   }
 
   void refreshEntities() {
-    entitiesFuture = api.listEntities(type: "light.");
+    entitiesFuture = api.listEntities(type: "scene.");
+  }
+
+  Future<void> handleRefresh() async {
+    setState(() {
+      refreshEntities();
+    });
   }
 
   @override
@@ -36,13 +45,10 @@ class _LightsPageState extends State<LightsPage> {
           alignment: Alignment.topCenter,
           width: MediaQuery.of(context).size.width * 0.95,
           child: RefreshIndicator(
-            onRefresh: () async {
-              refreshEntities();
-              setState(() {});
-            },
+            onRefresh: () => handleRefresh(),
             child: ListView(
-              controller: SmoothRotaryScrollController(),
               padding: const EdgeInsets.only(bottom: 15),
+              controller: SmoothRotaryScrollController(),
               children: [
                 SizedBox(
                   height: MediaQuery.of(context).size.height / 12,
@@ -51,7 +57,7 @@ class _LightsPageState extends State<LightsPage> {
                   height: MediaQuery.of(context).size.height / 12,
                 ),
                 FutureBuilder(
-                  future: entitiesFuture,
+                  future: api.listEntities(type: "scene."),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return SizedBox(
@@ -64,34 +70,27 @@ class _LightsPageState extends State<LightsPage> {
                               // Hacky workaround to add text to the top of the list
                               return const Center(
                                 child: Padding(
-                                  padding: EdgeInsets.only(bottom: 10.0),
+                                  padding: EdgeInsets.only(bottom: 20.0),
                                   child: Text(
-                                    "Lights",
+                                    "Scenes",
                                     style: TextStyle(fontSize: 16),
                                   ),
                                 ),
                               );
                             }
-                            var iconColor = Colors.white;
+                            var iconColor = const Color.fromRGBO(90, 90, 90, 1);
+                            var switchIcon = Icons.device_hub;
                             if (snapshot.data![index - 1]
                                 .containsKey('attributes')) {
-                              if (snapshot.data![index - 1]['attributes']
-                                      ['attributes']
-                                  .containsKey("rgb_color")) {
-                                if (snapshot.data![index - 1]['attributes']
-                                        ['attributes']['rgb_color'] !=
-                                    null) {
-                                  iconColor = Color.fromRGBO(
+                              iconColor = Colors.white;
+                              switchIcon = String2Icon.getIconDataFromString(
                                       snapshot.data![index - 1]['attributes']
-                                          ['attributes']['rgb_color'][0]!,
-                                      snapshot.data![index - 1]['attributes']
-                                          ['attributes']['rgb_color'][1]!,
-                                      snapshot.data![index - 1]['attributes']
-                                          ['attributes']['rgb_color'][2]!,
-                                      1);
-                                }
-                              }
+                                              ['attributes']['icon']
+                                          .toString()
+                                          .replaceAll('mdi:', '')) ??
+                                  Icons.palette;
                             }
+
                             return snapshot.data![index - 1]
                                         ['friendly_name']! ==
                                     'spacerItem'
@@ -109,8 +108,38 @@ class _LightsPageState extends State<LightsPage> {
                                     ],
                                   )
                                 : ListTile(
+                                    onTap: () async {
+                                      await api
+                                          .callService(
+                                              'scene',
+                                              'turn_on',
+                                              jsonEncode({
+                                                'entity_id':
+                                                    snapshot.data![index - 1]
+                                                        ['entity_id']
+                                              }))
+                                          .then(
+                                        (value) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Center(
+                                                  child: Text('Ran Scene')),
+                                              backgroundColor: Colors.blue,
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              margin: EdgeInsets.all(50),
+                                              elevation: 30,
+                                            ),
+                                          );
+                                          setState(() {
+                                            refreshEntities();
+                                          });
+                                        },
+                                      );
+                                    },
                                     leading: Icon(
-                                      Icons.lightbulb,
+                                      switchIcon,
                                       color: iconColor,
                                     ),
                                     title: Text(
@@ -119,8 +148,9 @@ class _LightsPageState extends State<LightsPage> {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     subtitle: Text(
-                                      snapshot.data![index - 1]['attributes']
-                                          ['state']!,
+                                      timeago.format(DateTime.parse(
+                                          snapshot.data![index - 1]
+                                              ['attributes']['state']!)),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     tileColor:
@@ -129,53 +159,6 @@ class _LightsPageState extends State<LightsPage> {
                                       side: const BorderSide(width: 2),
                                       borderRadius: BorderRadius.circular(50),
                                     ),
-                                    onTap: () async {
-                                      if (snapshot.data![index - 1]
-                                              ['attributes']['state']! ==
-                                          "on") {
-                                        await Navigator.of(context)
-                                            .push(
-                                          MaterialPageRoute(
-                                            builder: (context) => RotatePage(
-                                                onOffState: true,
-                                                api: api,
-                                                entityId:
-                                                    snapshot.data![index - 1]
-                                                            ['attributes']
-                                                        ['entity_id']),
-                                          ),
-                                        )
-                                            .then(
-                                          (value) {
-                                            setState(() {
-                                              refreshEntities();
-                                            });
-                                          },
-                                        );
-                                      } else {
-                                        await Navigator.of(context)
-                                            .push(
-                                          MaterialPageRoute(
-                                            builder: (context) => RotatePage(
-                                                onOffState: false,
-                                                api: api,
-                                                entityId:
-                                                    snapshot.data![index - 1]
-                                                            ['attributes']
-                                                        ['entity_id']),
-                                          ),
-                                        )
-                                            .then(
-                                          (value) {
-                                            setState(() {
-                                              refreshEntities();
-                                            });
-                                          },
-                                        );
-                                      }
-
-                                      // Refresh upon returning from RotatePage
-                                    },
                                   );
                           },
                         ),

@@ -20,6 +20,9 @@ dependencies:
   ffi: ^2.0.1
   http: ^1.1.0
   tizen_interop: ^0.2.0
+  string_2_icon: ^0.0.2
+  timeago: ^3.6.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

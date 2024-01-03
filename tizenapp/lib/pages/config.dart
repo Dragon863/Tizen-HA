@@ -155,7 +155,7 @@ class TokenPage extends StatelessWidget {
   final String code;
   final Future<Map> Function() getToken;
 
-  TokenPage({super.key, required this.code, required this.getToken});
+  const TokenPage({super.key, required this.code, required this.getToken});
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +185,7 @@ class TokenPage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text('Please verify this matches:'),
+                        const Text('Tap below if you entered this:'),
                         Text('${snapshot.data!['server']}'),
                       ],
                     ),

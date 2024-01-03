@@ -149,7 +149,7 @@ class _RotatePageState extends State<RotatePage> {
                       builder: (context) => ColorPage(
                           currentColor: Colors.white,
                           api: api,
-                          entityId: "light.led_strip_bedroom_light"),
+                          entityId: entityId),
                     ),
                   );
                   initColor();

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tizenapp/pages/automations.dart';
 import 'package:tizenapp/pages/config.dart';
 import 'package:tizenapp/pages/lights.dart';
+import 'package:tizenapp/pages/locks.dart';
 import 'package:tizenapp/pages/people.dart';
+import 'package:tizenapp/pages/scenes.dart';
 import 'package:tizenapp/pages/switches.dart';
 import 'package:tizenapp/utils/hass.dart';
 import 'rotary_lib/src/smooth_scroll.dart';
@@ -124,6 +127,51 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               ListTile(
+                leading: const Icon(Icons.smart_toy_outlined),
+                title: const Text('Automations'),
+                subtitle: const Text('Trigger & start'),
+                tileColor: const Color.fromARGB(66, 82, 82, 82),
+                shape: RoundedRectangleBorder(
+                  side: const BorderSide(width: 2),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => AutomationPage(api: api!),
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.palette),
+                title: const Text('Scenes'),
+                subtitle: const Text('Run scene'),
+                tileColor: const Color.fromARGB(66, 82, 82, 82),
+                shape: RoundedRectangleBorder(
+                  side: const BorderSide(width: 2),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ScenePage(api: api!),
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.lock_open),
+                title: const Text('Locks'),
+                subtitle: const Text('Lock/Unlock'),
+                tileColor: const Color.fromARGB(66, 82, 82, 82),
+                shape: RoundedRectangleBorder(
+                  side: const BorderSide(width: 2),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => LocksPage(api: api!),
+                  ),
+                ),
+              ),
+              ListTile(
                 leading: const Icon(Icons.settings),
                 title: const Text('Config'),
                 subtitle: const Text('Set token'),
@@ -132,16 +180,16 @@ class _HomePageState extends State<HomePage> {
                   side: const BorderSide(width: 2),
                   borderRadius: BorderRadius.circular(50),
                 ),
-                onTap: () {
+                onTap: () async {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => SetupPage(api: api!),
                     ),
-                  );
-                  getAPIFromSharedPreferences().then((value) {
+                  ).then((value) async {
+                    final newApi = await getAPIFromSharedPreferences();
                     setState(() {
-                      api = value;
+                      api = newApi;
                     });
                   });
                 },

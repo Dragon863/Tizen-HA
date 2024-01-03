@@ -44,7 +44,6 @@ class _SwitchesPageState extends State<SwitchesPage> {
           child: RefreshIndicator(
             onRefresh: () => handleRefresh(),
             child: ListView(
-              controller: SmoothRotaryScrollController(),
               children: [
                 SizedBox(
                   height: MediaQuery.of(context).size.height / 12,
@@ -59,6 +58,7 @@ class _SwitchesPageState extends State<SwitchesPage> {
                       return SizedBox(
                         height: MediaQuery.of(context).size.height,
                         child: ListView.builder(
+                          controller: SmoothRotaryScrollController(),
                           clipBehavior: Clip.none,
                           itemCount: snapshot.data!.length + 1,
                           itemBuilder: (context, index) {

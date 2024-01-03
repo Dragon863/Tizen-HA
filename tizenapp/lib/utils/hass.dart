@@ -49,8 +49,7 @@ class API {
     );
     for (var entity in jsonDecode(result)) {
       if (type == null) {
-        final entityState = await getState(entity['entity_id']);
-        print(entityState);
+        final entityState = entity;
         if (entityState['attributes'].containsKey('friendly_name')) {
           returnedMap.add(
             {

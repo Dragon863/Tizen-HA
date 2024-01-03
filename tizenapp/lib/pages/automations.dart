@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:tizenapp/pages/rotate.dart';
+import 'package:tizenapp/pages/automation_control.dart';
 import 'package:tizenapp/rotary_lib/src/rotary_base.dart';
 import 'package:tizenapp/rotary_lib/src/smooth_scroll.dart';
 import 'package:tizenapp/utils/hass.dart';
 
-class LightsPage extends StatefulWidget {
+class AutomationPage extends StatefulWidget {
   final API api;
 
-  const LightsPage({Key? key, required this.api}) : super(key: key);
+  const AutomationPage({Key? key, required this.api}) : super(key: key);
 
   @override
-  State<LightsPage> createState() => _LightsPageState();
+  State<AutomationPage> createState() => _AutomationPageState();
 }
 
-class _LightsPageState extends State<LightsPage> {
+class _AutomationPageState extends State<AutomationPage> {
   API get api => widget.api;
   late Future<List<dynamic>> entitiesFuture;
 
@@ -25,7 +25,13 @@ class _LightsPageState extends State<LightsPage> {
   }
 
   void refreshEntities() {
-    entitiesFuture = api.listEntities(type: "light.");
+    entitiesFuture = api.listEntities(type: "automation.");
+  }
+
+  Future<void> handleRefresh() async {
+    setState(() {
+      refreshEntities();
+    });
   }
 
   @override
@@ -36,13 +42,10 @@ class _LightsPageState extends State<LightsPage> {
           alignment: Alignment.topCenter,
           width: MediaQuery.of(context).size.width * 0.95,
           child: RefreshIndicator(
-            onRefresh: () async {
-              refreshEntities();
-              setState(() {});
-            },
+            onRefresh: () => handleRefresh(),
             child: ListView(
-              controller: SmoothRotaryScrollController(),
               padding: const EdgeInsets.only(bottom: 15),
+              controller: SmoothRotaryScrollController(),
               children: [
                 SizedBox(
                   height: MediaQuery.of(context).size.height / 12,
@@ -51,7 +54,7 @@ class _LightsPageState extends State<LightsPage> {
                   height: MediaQuery.of(context).size.height / 12,
                 ),
                 FutureBuilder(
-                  future: entitiesFuture,
+                  future: api.listEntities(type: "automation."),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return SizedBox(
@@ -64,34 +67,26 @@ class _LightsPageState extends State<LightsPage> {
                               // Hacky workaround to add text to the top of the list
                               return const Center(
                                 child: Padding(
-                                  padding: EdgeInsets.only(bottom: 10.0),
+                                  padding: EdgeInsets.only(bottom: 20.0),
                                   child: Text(
-                                    "Lights",
+                                    "Automations",
                                     style: TextStyle(fontSize: 16),
                                   ),
                                 ),
                               );
                             }
-                            var iconColor = Colors.white;
+                            var iconColor = const Color.fromRGBO(90, 90, 90, 1);
+                            var switchIcon = Icons.smart_toy_outlined;
                             if (snapshot.data![index - 1]
                                 .containsKey('attributes')) {
                               if (snapshot.data![index - 1]['attributes']
-                                      ['attributes']
-                                  .containsKey("rgb_color")) {
-                                if (snapshot.data![index - 1]['attributes']
-                                        ['attributes']['rgb_color'] !=
-                                    null) {
-                                  iconColor = Color.fromRGBO(
-                                      snapshot.data![index - 1]['attributes']
-                                          ['attributes']['rgb_color'][0]!,
-                                      snapshot.data![index - 1]['attributes']
-                                          ['attributes']['rgb_color'][1]!,
-                                      snapshot.data![index - 1]['attributes']
-                                          ['attributes']['rgb_color'][2]!,
-                                      1);
-                                }
+                                      ['state'] ==
+                                  "on") {
+                                iconColor = Colors.white;
+                                switchIcon = Icons.smart_toy;
                               }
                             }
+
                             return snapshot.data![index - 1]
                                         ['friendly_name']! ==
                                     'spacerItem'
@@ -109,8 +104,41 @@ class _LightsPageState extends State<LightsPage> {
                                     ],
                                   )
                                 : ListTile(
+                                    onTap: () async {
+                                      final state = snapshot.data![index - 1]
+                                          ['attributes']['state'];
+                                      bool onOff;
+                                      if (state == 'on') {
+                                        onOff = true;
+                                      } else {
+                                        onOff = false;
+                                      }
+                                      await Navigator.of(context)
+                                          .push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              AutomationControlPage(
+                                                  api: api,
+                                                  currentState: onOff,
+                                                  friendlyName:
+                                                      snapshot.data![index - 1]
+                                                          ['friendly_name']!,
+                                                  entityId: snapshot
+                                                              .data![index - 1]
+                                                          ['attributes']
+                                                      ['entity_id']),
+                                        ),
+                                      )
+                                          .then(
+                                        (value) {
+                                          setState(() {
+                                            refreshEntities();
+                                          });
+                                        },
+                                      );
+                                    },
                                     leading: Icon(
-                                      Icons.lightbulb,
+                                      switchIcon,
                                       color: iconColor,
                                     ),
                                     title: Text(
@@ -129,53 +157,6 @@ class _LightsPageState extends State<LightsPage> {
                                       side: const BorderSide(width: 2),
                                       borderRadius: BorderRadius.circular(50),
                                     ),
-                                    onTap: () async {
-                                      if (snapshot.data![index - 1]
-                                              ['attributes']['state']! ==
-                                          "on") {
-                                        await Navigator.of(context)
-                                            .push(
-                                          MaterialPageRoute(
-                                            builder: (context) => RotatePage(
-                                                onOffState: true,
-                                                api: api,
-                                                entityId:
-                                                    snapshot.data![index - 1]
-                                                            ['attributes']
-                                                        ['entity_id']),
-                                          ),
-                                        )
-                                            .then(
-                                          (value) {
-                                            setState(() {
-                                              refreshEntities();
-                                            });
-                                          },
-                                        );
-                                      } else {
-                                        await Navigator.of(context)
-                                            .push(
-                                          MaterialPageRoute(
-                                            builder: (context) => RotatePage(
-                                                onOffState: false,
-                                                api: api,
-                                                entityId:
-                                                    snapshot.data![index - 1]
-                                                            ['attributes']
-                                                        ['entity_id']),
-                                          ),
-                                        )
-                                            .then(
-                                          (value) {
-                                            setState(() {
-                                              refreshEntities();
-                                            });
-                                          },
-                                        );
-                                      }
-
-                                      // Refresh upon returning from RotatePage
-                                    },
                                   );
                           },
                         ),
