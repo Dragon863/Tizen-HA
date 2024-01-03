@@ -1,10 +1,6 @@
 # Tizen-HA
-![Screenshot of home page](https://raw.githubusercontent.com/Dragon863/Tizen-HA/main/screenshots/scr1.png)
-![Screenshot of switches page](https://raw.githubusercontent.com/Dragon863/Tizen-HA/main/screenshots/scr2.png)
-![Screenshot of lights page](https://raw.githubusercontent.com/Dragon863/Tizen-HA/main/screenshots/scr3.png)
-![Screenshot of pairing page](https://raw.githubusercontent.com/Dragon863/Tizen-HA/main/screenshots/scr4.png)
-![Screenshot of light control page](https://raw.githubusercontent.com/Dragon863/Tizen-HA/main/screenshots/scr5.png)
-![Screenshot of light colour page](https://raw.githubusercontent.com/Dragon863/Tizen-HA/main/screenshots/scr6.png)
+![Screenshot of home page](https://raw.githubusercontent.com/Dragon863/Tizen-HA/main/screenshots/scr1.png) ![Screenshot of switches page](https://raw.githubusercontent.com/Dragon863/Tizen-HA/main/screenshots/scr2.png) 
+![Screenshot of lights page](https://raw.githubusercontent.com/Dragon863/Tizen-HA/main/screenshots/scr3.png) ![Screenshot of pairing page](https://raw.githubusercontent.com/Dragon863/Tizen-HA/main/screenshots/scr4.png) 
 
 This is a small, unofficial companion app written using [flutter-tizen](https://github.com/flutter-tizen/flutter-tizen) to control lights and switches using Home Assistant. To get started, install flutter-tizen and run `flutter-tizen build tpk --device-profile wearable --release` in the `tizenapp/` directory , then install it with `sdb install [tpk name]` after connecting your watch with SDB. This app is being approved on the samsung galaxy store and should probably be available in the next few months for easier installation.
 
